@@ -39,7 +39,7 @@ class PostModelTest(TestCase):
         if flag:
             page_obj = response.context['post']
         else:
-            page_obj = response.context['page_obj'][0]
+            page_obj = response.context['page_obj'][settings.ZERO]
         self.assertEqual(page_obj.author, self.post.author)
         self.assertEqual(page_obj.group, self.post.group)
         self.assertEqual(page_obj.id, self.post.id)
@@ -56,9 +56,8 @@ class PostModelTest(TestCase):
     def test_index_context(self):
         """Шаблон Index сформирован с правильным контекстом."""
         response = self.authorized_client.get(reverse('posts:index'))
-        page_obj = response.context['page_obj'][settings.ZERO]
 
-        self.check_attrs(page_obj)
+        self.check_attrs(response)
 
     def test_group_list_context(self):
         """Проверка Group list использует правильные данные в контекст."""

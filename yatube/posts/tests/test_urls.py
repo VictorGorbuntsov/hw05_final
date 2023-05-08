@@ -70,7 +70,7 @@ class PostModelTest(TestCase):
         templates_url_names = (
             ('posts:index', None, 'posts/index.html'),
             ('posts:group_list', (self.group.slug,), 'posts/group_list.html'),
-            ('posts:profile', (self.user.username,), 'posts/profile.html'),
+            ('posts:profile', (self.post.author,), 'posts/profile.html'),
             ('posts:post_detail', (self.post.id,), 'posts/post_detail.html'),
             ('posts:post_edit', (self.post.id,), 'posts/create_post.html'),
             ('posts:create', None, 'posts/create_post.html'),

@@ -7,9 +7,8 @@ from .forms import CommentForm, PostForm
 from .utils import get_page_context
 
 
-@cache_page(60 * 20)
 def index(request):
-    posts = Post.objects.select_related('group', 'author')
+    posts = Post.objects.select_related('group', 'author').all()
     context = {
         'page_obj': get_page_context(request, posts)
     }

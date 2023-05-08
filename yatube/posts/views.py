@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import cache_page
 
 from .models import Comment, Follow, Group, Post, User
 from .forms import CommentForm, PostForm
@@ -79,6 +78,7 @@ def post_edit(request, post_id):
     context = {'form': form, 'post_id': post_id}
     return render(request, 'posts/create_post.html', context)
 
+
 @login_required
 def add_comment(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
@@ -89,6 +89,7 @@ def add_comment(request, post_id):
         comment.post = post
         comment.save()
     return redirect('posts:post_detail', post_id=post_id)
+
 
 @login_required
 def follow_index(request):

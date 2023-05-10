@@ -1,15 +1,22 @@
-from django.test import Client, TestCase
+import tempfile
+import shutil
+
+from django.test import Client, override_settings, TestCase
 from django.urls import reverse
 from django import forms
 from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
 
 from ..forms import PostForm
-from ..models import Follow, Post, Group, User
+from ..models import Comment, Follow, Post, Group, User
 
 NUMBER_OF_PAGINATOR_POSTS = 20
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostModelTest(TestCase):
 
     @classmethod

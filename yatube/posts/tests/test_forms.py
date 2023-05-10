@@ -1,9 +1,13 @@
 from http import HTTPStatus
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.conf import settings
 
 from ..models import Group, Post, User
+
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
 class PostFormTest(TestCase):
@@ -49,6 +53,7 @@ class PostFormTest(TestCase):
         self.assertEqual(post.author, self.user)
         self.assertEqual(post.group.id, form_data['group'])
         self.assertEqual(post.text, form_data['text'])
+        self.assertEqual(f'posts/{self.post_text_form["image"]}', post.image)
 
     def test_create_post_by_guest(self):
         """Работа формы незарегистрированного пользователя."""

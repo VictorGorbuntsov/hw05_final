@@ -78,6 +78,9 @@ class Comment(models.Model):
         verbose_name = 'Комментарий',
         verbose_name_plural = 'Comment'
 
+    def __str__(self):
+        return self.post
+
 
 class Follow(models.Model):
 
@@ -98,3 +101,6 @@ class Follow(models.Model):
     class Meta:
         verbose_name = 'Follow',
         verbose_name_plural = 'Following'
+
+    def __str__(self):
+        return self.user

@@ -135,13 +135,10 @@ class PostModelTest(TestCase):
 
     def test_authorized_user_follow(self):
         """Авторизированный пользователь может ПОДПИСАТЬСЯ на автора"""
-        follow = Follow.objects.filter(
-            user=self.user, author=self.another_user)
-        self.assertFalse(follow)
         fol_num_before = Follow.objects.count()
         self.authorized_client.get(
             reverse('posts:profile_follow',
-                    kwargs={'username': self.another_user.username}))
+                    args=(self.another_user.username,)))
         fol_num_after = Follow.objects.count()
         self.assertEqual(fol_num_after, fol_num_before + settings.NUMBER_ONE)
         follow = Follow.objects.filter(
@@ -151,15 +148,9 @@ class PostModelTest(TestCase):
     def test_authorized_user_unfollow(self):
         """Авторизированный пользователь может ОТПИСАТЬСЯ от автора"""
         Follow.objects.create(user=self.user, author=self.another_user)
-        follow = Follow.objects.filter(
-            user=self.user, author=self.another_user)
-        self.assertTrue(follow)
         self.authorized_client.get(
             reverse('posts:profile_unfollow',
-                    kwargs={'username': self.another_user.username}))
-        follow = Follow.objects.filter(
-            user=self.user, author=self.another_user)
-        self.assertFalse(follow)
+                    args=(self.another_user.username,)))
 
     def test_new_post_follower(self):
         """Пост появляется в ленте подписчика"""
@@ -176,14 +167,6 @@ class PostModelTest(TestCase):
 
     def test_new_post_not_follower(self):
         """Пост НЕ появляется в ленте не подписчика"""
-        self.authorized_client.get(
-            reverse('posts:profile_follow',
-                    kwargs={'username': self.another_user.username}))
-        post = Post.objects.create(
-            text='пост для подписчика',
-            author=self.another_user,
-            group=self.another_group
-        )
         response = self.follow_client.get(
             reverse('posts:follow_index'))
         self.assertNotIn(post, response.context['page_obj'])

@@ -165,9 +165,10 @@ class PostModelTest(TestCase):
         fol_num_after = Follow.objects.count()
         self.assertEqual(fol_num_after, fol_num_before + settings.NUMBER_ONE)
         follow = Follow.objects.filter(
-            user=self.user, author=self.another_user)
-        self.assertTrue(follow)
-        print(follow.user)
+            user=self.user, author=self.another_user).first()
+        self.assertEqual(, self.user)
+        self.assertEqual(, self.follow_user)
+        print(follow.first())
 
     def test_authorized_user_unfollow(self):
         """Авторизированный пользователь может ОТПИСАТЬСЯ от автора"""

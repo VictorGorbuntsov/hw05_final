@@ -79,7 +79,7 @@ class Comment(models.Model):
         verbose_name_plural = 'Comment'
 
     def __str__(self):
-        return self.post[:settings.THIRTY]
+        return self.text
 
 
 class Follow(models.Model):

@@ -43,7 +43,7 @@ class PostFormTest(TestCase):
             content_type='image/gif'
         )
 
-        cls.post_text_form = {'text': 'Измененный тект',
+        cls.post_text_form = {'text': 'Измененный текст',
                               'group': cls.group.pk,
                               'image': uploaded,
                               }
@@ -58,7 +58,8 @@ class PostFormTest(TestCase):
         self.assertEqual(posts_count, 1)
         form_data = {
             'text': 'Какой-то текст',
-            'group': self.group.id
+            'group': self.group.id,
+            'image': self.post_text_form['image'],
         }
         response = self.authorized_client.post(
             reverse('posts:create'),
@@ -75,6 +76,7 @@ class PostFormTest(TestCase):
         self.assertEqual(post.author, self.user)
         self.assertEqual(post.group.id, form_data['group'])
         self.assertEqual(post.text, form_data['text'])
+        self.assertEqual(post.image, form_data['image'])
 
     def test_create_post_by_guest(self):
         """Работа формы незарегистрированного пользователя."""

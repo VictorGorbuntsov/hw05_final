@@ -35,6 +35,7 @@ class PostModelTest(TestCase):
             ('posts:post_detail', (self.post.id,)),
             ('posts:post_edit', (self.post.id,)),
             ('posts:create', None),
+            ('posts:follow_index', None),
         )
 
     def test_for_matching_reverse_with_hardcore(self):
@@ -59,6 +60,7 @@ class PostModelTest(TestCase):
              f'/posts/{self.post.id}/edit/'
              ),
             ('posts:create', None, '/create/'),
+            ('posts:follow_index', None, '/follow/'),
         )
         for name, args, url in reverse_for_url:
             with self.subTest(name=name):

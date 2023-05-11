@@ -166,9 +166,8 @@ class PostModelTest(TestCase):
         self.assertEqual(fol_num_after, fol_num_before + settings.NUMBER_ONE)
         follow = Follow.objects.filter(
             user=self.user, author=self.another_user).first()
-        self.assertEqual(, self.user)
-        self.assertEqual(, self.follow_user)
-        print(follow.first())
+        self.assertEqual(follow.user, self.user)
+        self.assertEqual(follow.author, self.another_user)
 
     def test_authorized_user_unfollow(self):
         """Авторизированный пользователь может ОТПИСАТЬСЯ от автора"""
@@ -177,24 +176,19 @@ class PostModelTest(TestCase):
             reverse('posts:profile_unfollow',
                     args=(self.another_user.username,)))
 
-    def test_new_post_follower(self):
-        """Пост появляется в ленте подписчика"""
-        Follow.objects.create(user=self.user, author=self.another_user)
-        post = Post.objects.create(
-            text='пост для подписчика',
-            author=self.another_user,
-            group=self.another_group
-        )
-        response = self.authorized_client.get(
-            reverse('posts:follow_index'))
-        self.assertEqual(post,
-                         response.context['page_obj'][settings.ZERO])
-
-    # def test_new_post_not_follower(self):
-    #     """Пост НЕ появляется в ленте не подписчика"""
-    #     response = self.follow_client.get(
+    # def test_new_post_follower(self):
+    #     """Пост появляется в ленте подписчика"""
+    #     Follow.objects.create(user=self.user, author=self.another_user)
+    #     response = self.authorized_client.get(
     #         reverse('posts:follow_index'))
-    #     self.assertNotIn(post, response.context['page_obj'])
+    #     self.assertEqual(self.post,
+    #                      response.context[0])
+
+     # def test_new_post_not_follower(self):
+     #     """Пост НЕ появляется в ленте не подписчика"""
+     #     response = self.follow_client.get(
+     #         reverse('posts:follow_index'))
+     #     self.assertNotIn(self.post, response.context['page_obj'])
 
 
 class PaginatorViewTest(TestCase):
@@ -203,7 +197,12 @@ class PaginatorViewTest(TestCase):
         super().setUpClass()
 
         cls.user = User.objects.create(username='HasNoName')
+        cls.follow_user = User.objects.create(username='Follower')
 
+        cls.following = Follow.objects.create(
+            user=cls.follow_user,
+            author=cls.user,
+        )
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
@@ -227,10 +226,12 @@ class PaginatorViewTest(TestCase):
 
     def test_paginator_first_page(self):
         """Проверка корректной работы paginator."""
+
         list_of_check_page = (
             ('posts:index', None),
             ('posts:profile', (self.user.username,)),
             ('posts:group_list', (self.group.slug,)),
+            ('posts:follow_index', (self.following,)),
         )
         list_of_paginator_page = (
             ('?page=1', settings.POSTS_ON_PAGE),

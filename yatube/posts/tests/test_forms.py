@@ -56,14 +56,14 @@ class PostFormTest(TestCase):
         """Работа формы зарегистрирванного пользователя."""
         posts_count = Post.objects.count()
         self.assertEqual(posts_count, 1)
-        form_data = {
-            'text': 'Какой-то текст',
-            'group': self.group.id,
-            'image': self.uploaded,
-        }
+        # form_data = {
+        #     'text': 'Какой-то текст',
+        #     'group': self.group.id,
+        #     'image': self.uploaded,
+        # }
         response = self.authorized_client.post(
             reverse('posts:create'),
-            data=form_data,
+            data=self.post_text_form,
             follow=True
         )
 
@@ -76,7 +76,8 @@ class PostFormTest(TestCase):
         self.assertEqual(post.author, self.user)
         self.assertEqual(post.group.id, self.form_data['group'])
         self.assertEqual(post.text, self.form_data['text'])
-        self.assertEqual(post.image, self.form_data['image'])
+        # self.assertEqual(post.image, self.form_data['image'])
+        self.assertEqual(f'posts/{self.post_text_form["image"]}', post.image)
 
     def test_create_post_by_guest(self):
         """Работа формы незарегистрированного пользователя."""

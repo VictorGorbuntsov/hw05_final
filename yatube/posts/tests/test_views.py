@@ -242,7 +242,7 @@ class PaginatorViewTest(TestCase):
             with self.subTest(name=name):
                 for page, quantity in list_of_paginator_page:
                     with self.subTest(page=page, quantity=quantity):
-                        response = self.client.get(reverse(name, args=args)
+                        response = self.authorized_client.get(reverse(name, args=args)
                                                    + page)
                         self.assertEqual(
                             len(response.context['page_obj']),

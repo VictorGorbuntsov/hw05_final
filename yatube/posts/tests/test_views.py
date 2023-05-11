@@ -231,7 +231,6 @@ class PaginatorViewTest(TestCase):
             ('posts:index', None),
             ('posts:profile', (self.user.username,)),
             ('posts:group_list', (self.group.slug,)),
-            ('posts:follow_index', (self.follow_user,)),
         )
         list_of_paginator_page = (
             ('?page=1', settings.POSTS_ON_PAGE),

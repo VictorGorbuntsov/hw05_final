@@ -2,7 +2,7 @@ from http import HTTPStatus
 import tempfile
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client,override_settings, TestCase
+from django.test import Client, override_settings, TestCase
 from django.urls import reverse
 from django.conf import settings
 
@@ -59,7 +59,7 @@ class PostFormTest(TestCase):
         form_data = {
             'text': 'Какой-то текст',
             'group': self.group.id,
-            'image': self.post_text_form['image'],
+            'image': self.uploaded,
         }
         response = self.authorized_client.post(
             reverse('posts:create'),
@@ -74,9 +74,9 @@ class PostFormTest(TestCase):
             Post.objects.count(), posts_count + 1)
         post = Post.objects.first()
         self.assertEqual(post.author, self.user)
-        self.assertEqual(post.group.id, form_data['group'])
-        self.assertEqual(post.text, form_data['text'])
-        self.assertEqual(post.image, form_data['image'])
+        self.assertEqual(post.group.id, self.form_data['group'])
+        self.assertEqual(post.text, self.form_data['text'])
+        self.assertEqual(post.image, self.form_data['image'])
 
     def test_create_post_by_guest(self):
         """Работа формы незарегистрированного пользователя."""

@@ -199,7 +199,7 @@ class PaginatorViewTest(TestCase):
         cls.user = User.objects.create(username='HasNoName')
         cls.follow_user = User.objects.create(username='Follower')
 
-        cls.following = Follow.objects.create(
+        Follow.objects.create(
             user=cls.follow_user,
             author=cls.user,
         )
@@ -231,7 +231,7 @@ class PaginatorViewTest(TestCase):
             ('posts:index', None),
             ('posts:profile', (self.user.username,)),
             ('posts:group_list', (self.group.slug,)),
-            ('posts:follow_index', (self.following,)),
+            ('posts:follow_index', (self.follow_user,)),
         )
         list_of_paginator_page = (
             ('?page=1', settings.POSTS_ON_PAGE),

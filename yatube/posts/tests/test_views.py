@@ -188,14 +188,16 @@ class PostModelTest(TestCase):
         Follow.objects.create(user=self.follow_user, author=self.user)
         response = self.follow_client.get(
             reverse('posts:follow_index'))
-        self.assertNotIn(self.post,
-                         response.context['page_obj'])
+        self.assertIn(self.post,
+                      response.context['page_obj'])
         self.follow_client.post(
             reverse('posts:profile_unfollow', args=(self.user.username,)),
             follow=True
         )
-        self.assertNotIn(self.post,
-                         response.context['page_obj'])
+        response = self.follow_client.get(
+            reverse('posts:follow_index'))
+        self.assertFalse(response.context['page_obj'])
+
 
 class PaginatorViewTest(TestCase):
     @classmethod

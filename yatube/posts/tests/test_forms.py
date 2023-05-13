@@ -1,5 +1,6 @@
 from http import HTTPStatus
 import tempfile
+import shutil
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, override_settings, TestCase
@@ -28,6 +29,19 @@ class PostFormTest(TestCase):
             group=cls.group,
         )
 
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+
+    def setUp(self):
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_create_post_by_user(self):
+        """Работа формы зарегистрирванного пользователя."""
+        Post.objects.all().delete()
         small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
             b'\x01\x00\x80\x00\x00\x00\x00\x00'
@@ -36,48 +50,33 @@ class PostFormTest(TestCase):
             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
             b'\x0A\x00\x3B'
         )
-
         uploaded = SimpleUploadedFile(
             name='small.gif',
             content=small_gif,
             content_type='image/gif'
         )
-
-        cls.post_text_form = {'text': 'Измененный текст',
-                              'group': cls.group.pk,
-                              'image': uploaded,
-                              }
-
-    def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
-
-    def test_create_post_by_user(self):
-        """Работа формы зарегистрирванного пользователя."""
+        group = self.group
         posts_count = Post.objects.count()
-        self.assertEqual(posts_count, 1)
-        # form_data = {
-        #     'text': 'Какой-то текст',
-        #     'group': self.group.id,
-        #     'image': self.uploaded,
-        # }
+        self.assertEqual(posts_count, 0)
+        form_data = {
+            'text': 'Тестовый текст',
+            'group': group.id,
+            'image': uploaded,
+        }
         response = self.authorized_client.post(
             reverse('posts:create'),
-            data=self.post_text_form,
+            data=form_data,
             follow=True
         )
-
-        self.assertEqual(
-            response.status_code, HTTPStatus.OK)
-
-        self.assertEqual(
-            Post.objects.count(), posts_count + 1)
+        self.assertRedirects(response, reverse('posts:profile',
+                                               args=(self.user.username,)))
+        self.assertEqual(Post.objects.count(), posts_count + 1)
         post = Post.objects.first()
-        self.assertEqual(post.author, self.user)
-        self.assertEqual(post.group.id, self.form_data['group'])
-        self.assertEqual(post.text, self.form_data['text'])
-        # self.assertEqual(post.image, self.form_data['image'])
-        self.assertEqual(f'posts/{self.post_text_form["image"]}', post.image)
+        self.assertEqual(post.author, self.create_post.author)
+        self.assertEqual(post.group.id, form_data['group'])
+        self.assertEqual(post.text, form_data['text'])
+        self.assertEqual(post.image, f'posts/{form_data["image"].name}')
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_create_post_by_guest(self):
         """Работа формы незарегистрированного пользователя."""

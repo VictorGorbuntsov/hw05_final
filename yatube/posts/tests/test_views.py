@@ -176,19 +176,19 @@ class PostModelTest(TestCase):
             reverse('posts:profile_unfollow',
                     args=(self.another_user.username,)))
 
-    # def test_new_post_follower(self):
-    #     """Пост появляется в ленте подписчика"""
-    #     Follow.objects.create(user=self.user, author=self.another_user)
-    #     response = self.authorized_client.get(
-    #         reverse('posts:follow_index'))
-    #     self.assertEqual(self.post,
-    #                      response.context[0])
+    def test_new_post_follower(self):
+        """Пост появляется в ленте подписчика"""
+        Follow.objects.create(user=self.user, author=self.another_user)
+        response = self.authorized_client.get(
+            reverse('posts:follow_index'))
+        self.check_attrs(response)
 
-     # def test_new_post_not_follower(self):
-     #     """Пост НЕ появляется в ленте не подписчика"""
-     #     response = self.follow_client.get(
-     #         reverse('posts:follow_index'))
-     #     self.assertNotIn(self.post, response.context['page_obj'])
+    def test_new_post_not_follower(self):
+        """Пост НЕ появляется в ленте не подписчика"""
+        response = self.follow_client.get(
+            reverse('posts:follow_index'))
+        self.assertNotIn(self.post,
+                         response.context['page_obj'])
 
 
 class PaginatorViewTest(TestCase):

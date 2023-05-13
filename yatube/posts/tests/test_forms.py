@@ -29,7 +29,6 @@ class PostFormTest(TestCase):
             group=cls.group,
         )
 
-
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()

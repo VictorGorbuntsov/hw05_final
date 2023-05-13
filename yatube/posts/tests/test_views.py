@@ -1,5 +1,4 @@
 import tempfile
-import shutil
 
 from django.test import Client, override_settings, TestCase
 from django.urls import reverse
@@ -9,7 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
 
 from ..forms import PostForm
-from ..models import Comment, Follow, Post, Group, User
+from ..models import Follow, Post, Group, User
 
 NUMBER_OF_PAGINATOR_POSTS = 20
 
@@ -249,8 +248,9 @@ class PaginatorViewTest(TestCase):
             with self.subTest(name=name):
                 for page, quantity in list_of_paginator_page:
                     with self.subTest(page=page, quantity=quantity):
-                        response = self.authorized_client.get(reverse(name, args=args)
-                                                   + page)
+                        response = self.authorized_client.get(reverse(
+                            name, args=args) + page
+                                                              )
                         self.assertEqual(
                             len(response.context['page_obj']),
                             quantity)

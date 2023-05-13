@@ -24,7 +24,7 @@ class Post(models.Model):
         verbose_name='Группа',
     )
     image = models.ImageField(
-        'Картинка',
+        verbose_name='Картинка',
         upload_to='posts/',
         blank=True
     )

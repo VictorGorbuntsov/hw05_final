@@ -12,6 +12,8 @@ from ..models import Follow, Post, Group, User
 
 NUMBER_OF_PAGINATOR_POSTS = 20
 
+NUMBER_POSTS = 14
+
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
@@ -170,10 +172,17 @@ class PostModelTest(TestCase):
 
     def test_authorized_user_unfollow(self):
         """Авторизированный пользователь может ОТПИСАТЬСЯ от автора"""
-        Follow.objects.create(user=self.user, author=self.another_user)
-        self.authorized_client.get(
+        following = Follow.objects.create(
+            user=self.user,
+            author=self.another_user
+        )
+        self.assertEqual(len(Follow.objects.all()), 1)
+        self.authorized_client.post(
             reverse('posts:profile_unfollow',
-                    args=(self.another_user.username,)))
+                    args=(following.author.username,)),
+            follow=True
+        )
+        self.assertEqual(len(Follow.objects.all()), 0)
 
     def test_new_post_follower(self):
         """Пост появляется в ленте подписчика"""
@@ -184,7 +193,6 @@ class PostModelTest(TestCase):
 
     def test_new_post_not_follower(self):
         """Пост НЕ появляется в ленте не подписчика"""
-        Follow.objects.create(user=self.follow_user, author=self.user)
         response = self.follow_client.get(
             reverse('posts:follow_index'))
         self.assertIn(self.post,
@@ -206,30 +214,24 @@ class PaginatorViewTest(TestCase):
         cls.user = User.objects.create(username='HasNoName')
         cls.follow_user = User.objects.create(username='Follower')
 
-        Follow.objects.create(
-            user=cls.follow_user,
-            author=cls.user,
-        )
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
             description='Тестовое описание',
         )
-
-        list_of_posts = []
-
-        for page in range(NUMBER_OF_PAGINATOR_POSTS):
-            list_of_posts.append(
-                Post(
-                    text=f'Test text №{page}',
-                    author=cls.user,
-                    group=cls.group,
-                ))
-        Post.objects.bulk_create(list_of_posts)
+        cls.posts = Post.objects.bulk_create(
+            [Post(author=cls.user,
+                  text=f'{index}',
+                  group=cls.group) for index in range(NUMBER_POSTS)]
+        )
+        Follow.objects.create(
+            user=cls.follow_user,
+            author=cls.user,
+        )
 
     def setUp(self):
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+        self.authorized_client.force_login(self.follow_user)
 
     def test_paginator_first_page(self):
         """Проверка корректной работы paginator."""
@@ -238,10 +240,11 @@ class PaginatorViewTest(TestCase):
             ('posts:index', None),
             ('posts:profile', (self.user.username,)),
             ('posts:group_list', (self.group.slug,)),
+            ('posts:follow_index', None),
         )
         list_of_paginator_page = (
             ('?page=1', settings.POSTS_ON_PAGE),
-            ('?page=2', settings.POSTS_ON_PAGE)
+            ('?page=2', NUMBER_POSTS - settings.POSTS_ON_PAGE)
         )
 
         for name, args in list_of_check_page:

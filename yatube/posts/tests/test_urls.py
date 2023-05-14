@@ -36,6 +36,9 @@ class PostModelTest(TestCase):
             ('posts:post_edit', (self.post.id,)),
             ('posts:create', None),
             ('posts:follow_index', None),
+            ('posts:profile_follow', (self.user.username,)),
+            ('posts:profile_unfollow', (self.user.username,)),
+            ('posts:add_comment', (self.post.id,)),
         )
 
     def test_for_matching_reverse_with_hardcore(self):
@@ -60,7 +63,19 @@ class PostModelTest(TestCase):
              f'/posts/{self.post.id}/edit/'
              ),
             ('posts:create', None, '/create/'),
+            ('posts:add_comment',
+             (self.post.id,),
+             f'/posts/{self.post.id}/comment/',
+             ),
             ('posts:follow_index', None, '/follow/'),
+            ('posts:profile_follow',
+             (self.user.username,),
+             f'/profile/{self.user.username}/follow/',
+             ),
+            ('posts:profile_unfollow',
+             (self.user.username,),
+             f'/profile/{self.user.username}/unfollow/',
+             ),
         )
         for name, args, url in reverse_for_url:
             with self.subTest(name=name):
@@ -100,11 +115,21 @@ class PostModelTest(TestCase):
 
     def test_urls_author(self):
         """Доступность URL адреса автору поста"""
-        for name, args in self.reverse_names:
-            with self.subTest(name=name):
-                response = self.authorized_client.get(reverse(name, args=args),
+        for url, args in self.reverse_names:
+            with self.subTest(url=url):
+                response = self.authorized_client.get(reverse(url, args=args),
                                                       follow=True)
-                self.assertEqual(response.status_code, HTTPStatus.OK)
+                if url == 'posts:profile_follow':
+                    self.assertRedirects(response, reverse('posts:profile',
+                                                           args=args))
+                elif url == 'posts:profile_unfollow':
+                    self.assertEqual(response.status_code,
+                                     HTTPStatus.NOT_FOUND)
+                elif url == 'posts:add_comment':
+                    self.assertRedirects(response, reverse('posts:post_detail',
+                                                           args=args))
+                else:
+                    self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_404_url_locations(self):
         """Не доступная страница"""

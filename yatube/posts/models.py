@@ -79,7 +79,7 @@ class Comment(models.Model):
         verbose_name_plural = 'Comment'
 
     def __str__(self):
-        return self.text
+        return self.text[:settings.THIRTY]
 
 
 class Follow(models.Model):
@@ -103,4 +103,4 @@ class Follow(models.Model):
         verbose_name_plural = 'Following'
 
     def __str__(self):
-        return f'{self.user}'
+        return f'Пользователь {self.user} подписан на автора {self.author}'

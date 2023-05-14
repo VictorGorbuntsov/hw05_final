@@ -18,7 +18,7 @@ class GroupAdmin(admin.ModelAdmin):
 
 
 @admin.register(Comment)
-class PostAdmin(admin.ModelAdmin):
+class CommentAdmin(admin.ModelAdmin):
     list_display = ('post', 'author', 'text', 'created')
     list_editable = ('text',)
     search_fields = ('text',)
@@ -27,7 +27,7 @@ class PostAdmin(admin.ModelAdmin):
 
 
 @admin.register(Follow)
-class PostAdmin(admin.ModelAdmin):
+class FollowAdmin(admin.ModelAdmin):
     list_display = ('user', 'author')
     list_filter = ('user',)
     search_fields = ('author',)

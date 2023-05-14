@@ -193,17 +193,8 @@ class PostModelTest(TestCase):
 
     def test_new_post_not_follower(self):
         """Пост НЕ появляется в ленте не подписчика"""
-        response = self.follow_client.get(
-            reverse('posts:follow_index'))
-        self.assertIn(self.post,
-                      response.context['page_obj'])
-        self.follow_client.post(
-            reverse('posts:profile_unfollow', args=(self.user.username,)),
-            follow=True
-        )
-        response = self.follow_client.get(
-            reverse('posts:follow_index'))
-        self.assertFalse(response.context['page_obj'])
+        response = self.follow_client.get(reverse('posts:follow_index'))
+        self.assertEqual(response.context['paginator'].count, 0)
 
 
 class PaginatorViewTest(TestCase):

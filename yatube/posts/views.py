@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.conf import settings
 
 from .models import Follow, Group, Post, User
 from .forms import CommentForm, PostForm
@@ -98,7 +100,11 @@ def add_comment(request, post_id):
 def follow_index(request):
     posts = Post.objects.select_related(
         'author').filter(author__following__user=request.user)
-    context = {'page_obj': get_page_context(request, posts)}
+    paginator = Paginator(posts, settings.POSTS_ON_PAGE)
+    context = {
+        'page_obj': get_page_context(request, posts),
+        'paginator': paginator,
+    }
     return render(request, 'posts/follow.html', context)
 
 
